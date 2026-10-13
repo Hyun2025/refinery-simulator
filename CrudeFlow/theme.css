@@ -1,0 +1,305 @@
+:root {
+  --surface: #fff;
+  --ink: #183947;
+  --muted: #536e79;
+  --edge: #bfd4d9;
+  --accent: #167d80;
+  --page: #eaf2f4;
+  --soft: #e5eff0;
+  color-scheme: light;
+}
+:root[data-theme="night"] {
+  --surface: #122735;
+  --ink: #e4f0f5;
+  --muted: #b2c9d2;
+  --edge: #355363;
+  --accent: #40d7de;
+  --page: #081722;
+  --soft: #1b3544;
+  color-scheme: dark;
+}
+body {
+  background: var(--page);
+  color: var(--ink);
+}
+main {
+  position: relative;
+}
+main {
+  z-index: 1;
+  padding-top: 78px;
+}
+section,
+details,
+aside,
+dialog,
+.analysis-book {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--edge);
+}
+.note {
+  color: var(--muted);
+}
+button,
+select {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--edge);
+}
+input {
+  accent-color: var(--accent);
+}
+th,
+td {
+  border-color: var(--edge);
+}
+.book-nav,
+.doc-head,
+.lp-primer {
+  background: var(--soft);
+}
+.book-page section {
+  border-color: var(--edge);
+}
+.page-chooser [aria-current="page"] {
+  background: var(--accent);
+  color: var(--page);
+}
+#candidateContext,
+#mobileSummary {
+  background: var(--soft) !important;
+  color: var(--ink);
+}
+.lp-disclosure .lp-disclosure,
+#mobileActions,
+#mobileControls .sheet-header {
+  background: var(--soft);
+}
+#decision.ok {
+  background: var(--soft);
+}
+#decision.bad {
+  background: #752f34;
+  color: #fff;
+}
+#themeTools {
+  position: fixed;
+  right: 20px;
+  top: 8px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  padding: 6px;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+}
+#themeTools button {
+  min-height: 36px;
+  font-size: 13px;
+} /* Keep interactive controls above the main content stacking context. */
+#controlPanel {
+  top: 60px;
+  z-index: 10;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+/* An inset glow remains visible even when the page clips its outer shadow. */
+.theme-heat {
+  animation: cooldown 2.8s ease-out;
+}
+@keyframes cooldown {
+  0%,
+  12% {
+    box-shadow:
+      inset 0 0 0 2px #f13242,
+      inset 0 0 24px #ef26364d,
+      0 0 18px #e1263555;
+    border-color: #f13242;
+  }
+  45% {
+    box-shadow:
+      inset 0 0 0 1px #dc7c49,
+      inset 0 0 12px #dc7c4926;
+    border-color: #dc7c49;
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+    border-color: var(--edge);
+  }
+}
+[data-theme="night"] svg text:not([fill]) {
+  fill: var(--ink);
+}
+[data-theme="night"] svg path[stroke="#e3ebed"],
+[data-theme="night"] svg path[stroke="#e0e8eb"] {
+  stroke: var(--edge);
+}
+[data-theme="night"] svg text[fill="#172b35"] {
+  fill: var(--ink);
+}
+[data-theme="night"] .help-mark {
+  background: var(--soft);
+  color: var(--ink);
+}
+[data-effects="off"] .theme-heat {
+  animation: none;
+}
+@media (max-width: 900px) {
+  #themeTools {
+    position: relative;
+    right: auto;
+    top: auto;
+    justify-content: flex-end;
+    margin: 8px 16px;
+  }
+  main {
+    padding-top: 16px !important;
+  }
+  #controlPanel {
+    top: auto;
+  }
+  #mobileSummary,
+  #mobileActions {
+    background: var(--surface);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-heat {
+    animation: none;
+  }
+}
+
+[data-theme="night"] svg path[fill="#f0f4f6"] {
+  fill: var(--soft);
+}
+[data-theme="night"] svg polyline[stroke="#172b35"] {
+  stroke: var(--ink);
+}
+
+/* Semantic map colors remain independent of the decorative refinery artwork. */
+:root {
+  --contour-ink: #183947;
+}
+:root[data-theme="night"] {
+  --contour-ink: #b7f7ff;
+}
+.map-contour {
+  stroke: var(--contour-ink);
+  vector-effect: non-scaling-stroke;
+}
+
+/* Static artwork scrolls away naturally. It never intercepts pointer input. */
+body {
+  position: relative;
+}
+#refineryHero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 760px;
+  z-index: 0;
+  pointer-events: none;
+  background: url("assets/refinery-day.png") center top / cover no-repeat;
+}
+#refineryHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 48%, var(--page) 100%);
+}
+[data-theme="night"] #refineryHero {
+  background-image: url("assets/refinery-night.png");
+}
+main > header {
+  margin-top: 220px;
+  padding: 24px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1px solid var(--edge);
+}
+@media (max-width: 900px) {
+  #refineryHero {
+    height: 580px;
+    background-position: 42% top;
+  }
+  main > header {
+    margin-top: 130px;
+    padding: 18px;
+  }
+  #themeTools {
+    flex-wrap: wrap;
+  }
+}
+
+/* LP charts share theme tokens and scale to their content container. */
+.lp-grid {
+  stroke: var(--edge);
+  fill: none;
+  stroke-width: 1;
+}
+#capacityChart svg,
+#learningChart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#capacityChart svg text,
+#learningChart svg text {
+  fill: var(--ink);
+  font-size: 13px;
+}
+#capacityChart [data-capacity] {
+  cursor: pointer;
+}
+#capacityChart [data-capacity]:focus {
+  outline: 2px solid var(--accent);
+}
+
+#modelAssumptions {
+  isolation: isolate;
+}
+
+#modelAssumptions.is-stuck::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    #00c9de,
+    #7864ff,
+    #f05caf,
+    #00c9de
+  );
+  background-size: 300% 100%;
+  animation: assumption-glow 6s linear infinite;
+}
+
+@keyframes assumption-glow {
+  from {
+    background-position: 0% 50%; 
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+/* Ambient light in Night-mode */
+[data-theme="night"] #modelAssumptions.is_stuck::after{
+  box-shadow: 0 2px 8px #00c9de55;
+}
+/* Fixed color in reduced-motion mode*/
+@media (prefers-reduced-motion: reduce){
+  #modelAssumptions.is-stuck::after{
+    animation: none; 
+    background: var(--accent);
+  }
+}

@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CrudeFlow B · 계약과 조달</title>
+    <style>
+      body {
+        margin: 0;
+        background: #edf3f5;
+        color: #183947;
+        font: 16px/1.7 system-ui;
+      }
+      main {
+        max-width: 1060px;
+        margin: auto;
+        padding: 32px 340px 60px 24px;
+      }
+      section,
+      details,
+      aside {
+        background: white;
+        padding: 22px;
+        border-radius: 16px;
+        margin: 18px 0;
+      }
+      h1 {
+        font-size: 36px;
+        line-height: 1.25;
+      }
+      h2 {
+        font-size: 21px;
+      }
+      aside {
+        position: fixed;
+        right: 18px;
+        top: 0;
+        bottom: 0;
+        width: 270px;
+        overflow: auto;
+        box-shadow: 0 5px 25px #163a4920;
+      }
+      label {
+        display: block;
+        margin: 14px 0;
+      }
+      input,
+      select {
+        width: 100%;
+        accent-color: #178278;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+      #modelAssumptions {
+        position: sticky;
+        top: 8px;
+        z-index: 4;
+        box-shadow: 0 3px 12px #163a4915;
+      }
+      details {
+        position: sticky;
+
+      }
+      details[open] .content {
+        max-height: 50vh;
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: right;
+        padding: 8px;
+        border-bottom: 1px solid #dde5e7;
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+      .scroll {
+        overflow: auto;
+      }
+      .note {
+        color: #5b7280;
+        font-size: 14px;
+      }
+      .ok {
+        background: #dff2eb;
+      }
+      .bad {
+        background: #ffe4df;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+        background: #142b39;
+        color: #e2f0f6;
+        padding: 18px;
+        border-radius: 10px;
+      }
+      button {
+        padding: 8px 14px;
+        border: 1px solid #bdd1d5;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+      }
+      .panel {
+        animation: fade 0.25s;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @media (max-width: 900px) {
+        main {
+          padding: 18px;
+        }
+        aside {
+          position: sticky;
+          top: 0;
+          width: auto;
+          max-height: 35vh;
+          z-index: 6;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        details {
+          top: 0;
+        }
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+      .analysis-book {
+        background: #fff;
+        border: 1px solid #d5e2e5;
+        border-radius: 18px;
+        margin-top: 18px;
+        overflow: hidden;
+      }
+      .book-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        background: #e4efef;
+      }
+      .book-nav p {
+        margin: 3px 0;
+      }
+      .page-chooser {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 12px;
+      }
+      .page-chooser button {
+        font-size: 12px;
+      }
+      .page-chooser [aria-current="page"] {
+        background: #176c69;
+        color: white;
+      }
+      .book-content {
+        height: auto;
+        min-height: 160px;
+      }
+      .book-page {
+        animation: turnpage 0.2s ease;
+      }
+      .book-page section {
+        margin: 0;
+        border-radius: 0;
+        border-top: 1px solid #e7eeee;
+      }
+      .book-page .book-nav {
+        position: static;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      @keyframes turnpage {
+        from {
+          opacity: 0.45;
+          transform: translateX(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      #docsToggle {
+        position: fixed;
+        left: 8px;
+        top: 45%;
+        z-index: 15;
+        background: #163a49;
+        color: white;
+        writing-mode: vertical-rl;
+        box-shadow: 0 4px 15px #163a4930;
+        padding: 15px 10px;
+      }
+      dialog {
+        width: min(850px, calc(100vw - 40px));
+        max-height: 85vh;
+        border: 0;
+        border-radius: 18px;
+        padding: 0;
+        color: #183947;
+        background: #fff;
+        box-shadow: 0 20px 70px #163a4950;
+      }
+      dialog::backdrop {
+        background: #102b3b80;
+      }
+      .doc-head {
+        padding: 16px 20px;
+        background: #e4efef;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .doc-head h2 {
+        margin: 0;
+        flex: 1;
+      }
+      .doc-head select {
+        width: auto;
+      }
+      .doc-head button {
+        font-size: 21px;
+      }
+      #docBody {
+        padding: 20px 28px;
+        max-height: 58vh;
+        overflow: auto;
+        line-height: 1.85;
+      }
+      #docBody h1 {
+        font-size: 28px;
+      }
+      #docBody h2 {
+        font-size: 22px;
+      }
+      #docBody p {
+        overflow-wrap: anywhere;
+      }
+      #docBody th,
+      #docBody td {
+        text-align: left;
+        vertical-align: top;
+      }
+      #docBody code {
+        background: #eef3f5;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      .doc-footer {
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .reader-open {
+        overflow: hidden;
+      }
+      main {
+        padding-left: 48px;
+      }
+      @media (max-width: 900px) {
+        main {
+          padding: 18px 18px 18px 42px;
+        }
+        #docsToggle {
+          left: 2px;
+          padding: 12px 6px;
+        }
+        .book-nav {
+          padding: 12px;
+          gap: 6px;
+        }
+        .book-nav strong {
+          font-size: 14px;
+        }
+        .doc-head {
+          flex-wrap: wrap;
+        }
+        #docBody {
+          padding: 15px;
+        }
+        dialog {
+          max-height: 90vh;
+        }
+        .page-chooser {
+          gap: 4px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .book-page {
+          animation: none;
+        }
+      }
+      .lp-conditions th,
+      .lp-conditions td {
+        text-align: left;
+        vertical-align: top;
+      }
+      #candidateContext {
+        font-size: 15px;
+        line-height: 1.7;
+      }
+    </style>
+    <link rel="stylesheet" href="help.css" />
+    <style>
+      .lp-disclosure {
+        position: static;
+        top: auto;
+        padding: 14px 18px;
+        margin: 12px 0;
+        box-shadow: none;
+        border: 1px solid #d5e2e5;
+      }
+      .lp-disclosure .lp-disclosure {
+        background: #f6f8f8;
+      }
+      #candidateContext {
+        position: sticky;
+        top: -22px;
+        z-index: 2;
+        background: #fff5df;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.65;
+        max-height: 42vh;
+        overflow: auto;
+      }
+      #candidateContext h3 {
+        font-size: 16px;
+      }
+      #candidateContext .note {
+        font-size: 12px;
+      }
+      #controlPanel > h2 {
+        font-size: 18px;
+        margin-top: 18px;
+      }
+      @media (max-width: 900px) {
+        #candidateContext {
+          position: static;
+          max-height: none;
+          font-size: 12px;
+        }
+        #controlPanel {
+          max-height: 45vh;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body>
+    <div id="refineryHero" aria-hidden="true"></div>
+    <div id="themeTools" aria-label="화면 테마">
+      <button id="themeToggle" type="button" aria-pressed="false">☾ 야간 테마</button
+      ><button id="effectsToggle" type="button">효과 끄기</button>
+    </div>
+    <button id="docsToggle" aria-haspopup="dialog" aria-controls="docsDialog">문서 읽기</button>
+    <dialog id="docsDialog" aria-labelledby="docTitle">
+      <header class="doc-head">
+        <h2 id="docTitle"></h2>
+        <label style="margin: 0"
+          >언어
+          <select id="docLanguage">
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+          </select></label
+        ><button id="docClose" aria-label="문서 닫기">×</button>
+      </header>
+      <article id="docBody"></article>
+      <footer class="doc-footer">
+        <button id="docPrev">← 이전 문서</button><button id="docNext">다음 문서 →</button>
+      </footer>
+    </dialog>
+    <aside id="controlPanel" aria-label="현재 구매 조합과 조건 조정">
+      <div id="candidateContext" aria-live="polite"></div>
+      <h2>조건 조정</h2>
+      <label
+        >휘발유 하루 계약량 (배럴/일)
+        <input
+          id="gasolineContract"
+          type="number"
+          min="0"
+          max="120000"
+          step="1"
+          value="5000"
+          inputmode="numeric"
+          aria-describedby="contractInputStatus"
+        />
+      </label>
+      <label
+        >경유 하루 계약량 (배럴/일)
+        <input
+          id="dieselContract"
+          type="number"
+          min="0"
+          max="120000"
+          step="1"
+          value="5000"
+          inputmode="numeric"
+          aria-describedby="contractInputStatus"
+        />
+      </label>
+      <p id="contractInputStatus" class="note" aria-live="polite"></p>
+      <label
+        >가격 경로<select id="scenario">
+          <option value="flat">Flat · 고정</option>
+          <option value="quadratic">Quadratic · 상승 후 복귀</option>
+          <option value="custom">Custom · 직접 조정</option>
+          <option value="wave">Wave · 하락 후 상승</option>
+        </select></label
+      ><label
+        >가격 변동폭 <output id="amplitudeV"></output
+        ><input id="amplitude" type="range" min="0" max="50" step="5" value="20" /></label
+      ><label
+        >X 추가 할인 ($/bbl) <output id="discountV"></output
+        ><input id="discount" type="range" min="0" max="15" step=".5" value="5" /></label
+      ><label
+        >X 입고 지연 (일) <output id="delayV"></output
+        ><input id="delay" type="range" min="0" max="20" step="1" value="0" /></label
+      ><label
+        >초기 Y 재고 (2만 배럴 처리 기준 일수) <output id="initialDaysV"></output
+        ><input id="initialDays" type="range" min="0" max="20" step="1" value="10" /></label
+      ><label
+        >하루 작업부하량 한도 <output id="budgetV"></output
+        ><input id="budget" type="range" min="10000" max="30000" step="1000" value="20000"
+      /></label>
+      <p class="note">
+        계약량의 기본값은 휘발유·경유 각각 하루 5,000배럴이며 위에서 변경할 수 있습니다. 처리
+        작업부하량은 공장이 얼마나 힘들게 일하는지를 나타내는 가상 점수입니다. 실제 전력이나 연료
+        사용량을 뜻하지 않습니다.
+      </p>
+    </aside>
+    <div id="mobileSummary" class="mobile-only" aria-live="polite"></div>
+    <main>
+      <header>
+        <p>CrudeFlow B · 가상 정유사의 원유 구매 실험</p>
+        <h1>싼 원유를 많이 사면<br />정유사에 더 이익일까요?</h1>
+        <p>
+          정유사는 원유를 사서 공장에서 처리한 뒤 휘발유와 경유 같은 제품을 판매합니다. 이
+          실험에서는 <strong>성질이 서로 다른 가상의 원유 세 종류를 X·Y·Z</strong>라고 부릅니다.
+          실제 회사나 특정 원유의 이름은 아닙니다.
+        </p>
+        <p>
+          <strong>여러분의 역할은 원유 구매 담당자입니다.</strong> X·Y·Z를 합쳐 100만 배럴을
+          구매하려고 합니다. 배럴은 원유와 제품의 양을 나타내는 단위입니다. 어떤 원유를 얼마나 살지
+          5% 단위로 정할 수 있습니다. 예를 들어 X 40%, Y 30%, Z 30%라면 각각 40만·30만·30만 배럴을
+          사는 것입니다.
+        </p>
+        <p>
+          <strong>반드시 지켜야 할 약속은</strong> 첫날부터 60일 동안 매일 휘발유
+          <span data-contract="gasoline">5,000</span>배럴과 경유
+          <span data-contract="diesel">5,000</span>배럴을 공급하는 것입니다. 하루라도 부족하면
+          계약을 모두 지킨 조합으로 인정하지 않습니다.
+        </p>
+        <p>
+          <strong>어떤 선택이 더 좋을까요?</strong> X는 싸게 살 수 있지만 처리에 더 많은 작업부하량이
+          필요하고, 휘발유가 나오는 비율도 낮습니다. 따라서 가격만 비교하지 않고 생산량·입고
+          지연·재고 비용을 함께 계산합니다. 가능한 구매 조합 231개를 모두 비교해, 계약을 지키는 조합
+          중 재고 가치까지 포함한 모형상 이익이 가장 높은 조합을 추천합니다.
+        </p>
+        <p class="note">
+          우측에서 가격·입고·공장 조건을 바꿔 보세요. 아래 분석 페이지는 구매 선택에 따라 생산과
+          손익이 어떻게 달라지는지 보여줍니다. 별도 LP 실험은 일별 운영 방식까지 조절했을 때의
+          결과를 비교합니다.
+        </p>
+      </header>
+      <details id="modelAssumptions">
+        <summary>이 실험의 규칙과 가정 · 눌러서 자세히 읽기</summary>
+        <div class="content">
+          <h3>1. X·Y·Z는 무엇이고, 무엇을 선택하나요?</h3>
+          <p>
+            X·Y·Z는 가격, 제품 생산 비율, 처리에 필요한 작업부하량이 서로 다른 세 종류의 가상
+            원유입니다. 새로 살 원유는 총 100만 배럴입니다. 각 원유의 구매 비율을 0%, 5%, 10%처럼
+            정하고, 세 비율을 더하면 100%가 되어야 합니다. 5%는 50,000배럴입니다.
+          </p>
+          <p>
+            아래 숫자는 실제 공장 자료가 아니라 비교 실험을 위해 정한 값입니다. ‘생산 비율(수율)’은
+            원유를 처리했을 때 제품이 얼마나 나오는지를 뜻합니다. 예를 들어 X 원유 100배럴에서는
+            휘발유 25배럴, 경유 35배럴, 잔사유 40배럴이 나온다고 가정합니다. 잔사유는 여기서
+            휘발유·경유 외에 남는 제품을 뜻합니다.
+          </p>
+          <table>
+            <tbody>
+              <tr>
+                <th>원유</th>
+                <th>구매가격</th>
+                <th>운송비</th>
+                <th>처리비</th>
+                <th>제품 생산 비율</th>
+                <th>작업부하량 점수</th>
+              </tr>
+              <tr>
+                <td>X</td>
+                <td>75−할인</td>
+                <td>3</td>
+                <td>5</td>
+                <td>25/35/40%</td>
+                <td>1.4</td>
+              </tr>
+              <tr>
+                <td>Y</td>
+                <td>78</td>
+                <td>2</td>
+                <td>4</td>
+                <td>30/45/25%</td>
+                <td>1.0</td>
+              </tr>
+              <tr>
+                <td>Z</td>
+                <td>80</td>
+                <td>1</td>
+                <td>4</td>
+                <td>35/40/25%</td>
+                <td>0.9</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            가격·운송비·처리비는 원유 1배럴당 달러(USD)입니다. 표의 생산 비율은 휘발유·경유·잔사유
+            순서입니다. 작업부하량 점수는 실제 전력 사용량이 아니라 처리 부담을 나타내는 가상
+            단위입니다. 부피 기준의 단순 생산 계산이며 실제 공장의 무게 기준 계산과는 다릅니다.
+          </p>
+          <h3>2. 처음부터 창고에 있던 재고도 사용합니다</h3>
+          <p>
+            기본 조건에서는 Y 원유 200,000배럴, 휘발유와 경유 각각 10,000배럴이 이미 있습니다.
+            잔사유는 없습니다. 이 재고는 새로 구매하는 100만 배럴과 별도입니다. 우측의 초기 Y 재고
+            설정은 1칸마다 20,000배럴씩 바뀝니다. 표시된 일수는 이 물량을 표현하기 위한 기준이며
+            실제 가동 가능한 일수를 보장하지 않습니다.
+          </p>
+          <h3>3. 원유가 도착하고 공장에서 처리하는 순서</h3>
+          <p>
+            원유는 기본적으로 7일차 생산 전에 도착합니다. X만 추가로 늦게 도착하도록 설정할 수
+            있습니다. 배에서 창고로 옮기는 작업을 ‘하역’이라고 하며 하루 최대 100,000배럴까지
+            가능합니다. 원유 탱크는 800,000배럴까지 저장합니다. 여러 원유가 함께 도착하면 기다리는
+            물량의 비율대로 나누어 하역합니다.
+          </p>
+          <p>
+            생산할 때는 창고에 있는 원유 비율대로 섞습니다. 처음부터 있던 Y와 원유별 입고 시점이
+            다르므로, 구매 비율과 매일 실제로 처리하는 비율은 다를 수 있습니다. 생산 비율과 배럴당
+            비용·작업부하량은 혼합 비율을 반영해 평균으로 계산합니다.
+          </p>
+          <p>
+            하루 처리량은 최대 20,000배럴입니다. 여기에 작업부하량 한도, 원유 재고, 제품 탱크의 빈
+            공간을 모두 확인해 가능한 만큼 처리합니다. 제품 탱크는 휘발유·경유·잔사유 각각
+            120,000배럴이며, 판매하기 전 생산 직후에도 이 한도를 넘을 수 없습니다.
+          </p>
+          <p class="note">
+            구매한 원유는 운송 중에도 회사 자산으로 봅니다. 운송비는 구매할 때 확정하고, 선박이
+            기다리는 동안의 추가 비용은 계산하지 않습니다.
+          </p>
+          <h3>4. 매일 생산한 뒤 계약 물량을 먼저 공급합니다</h3>
+          <ol>
+            <li><strong>생산:</strong> 원유를 처리해 제품 재고를 늘립니다.</li>
+            <li>
+              <strong>계약 공급:</strong> 매일 휘발유
+              <span data-contract="gasoline">5,000</span>배럴과 경유
+              <span data-contract="diesel">5,000</span>배럴을 공급합니다. 그날 부족한 양을 다음 날
+              더 공급하더라도 계약 위반은 없어지지 않습니다. 다른 회사의 제품을 사서 부족분을 채우는
+              방법은 허용하지 않습니다.
+            </li>
+            <li>
+              <strong>추가 판매:</strong> 5·10·15일처럼 5일마다 남은 제품을 판매합니다. 한 번에
+              휘발유 최대 5,000배럴, 경유 15,000배럴, 잔사유 30,000배럴까지 판매합니다. 다음 날
+              계약을 위해 휘발유 <span data-contract="gasoline">5,000</span>배럴과 경유
+              <span data-contract="diesel">5,000</span>배럴을 남기고, 60일차에는 남기지 않습니다.
+              재고가 부족하면 추가 판매를 줄입니다. 쓰지 못한 판매 한도는 다음 판매일로 넘기지
+              않습니다.
+            </li>
+          </ol>
+          <h3>5. 어떤 가격과 비용으로 계산하나요?</h3>
+          <p>
+            매일의 계약 판매가격은 배럴당 휘발유 95달러, 경유 105달러로 고정합니다. 추가 판매의
+            기준가격은 휘발유 95달러, 경유 105달러, 잔사유 55달러이며, 우측 가격 경로에 따라
+            변합니다. 원유 구매가격과 계약 판매가격은 이 경로 때문에 바뀌지 않습니다.
+          </p>
+          <p>
+            고정(Flat)은 가격이 일정합니다. 상승 후 복귀(Quadratic)는 중간에 가격이 오른 뒤 원래
+            가격으로 돌아옵니다. 하락 후 상승(Wave)은 낮아졌다 높아진 뒤 돌아옵니다. 직접
+            조정(Custom)은 그래프의 두 점을 움직여 정합니다. 모든 경로의 시작·마지막 가격은 같고 세
+            제품에 같은 변동률을 적용합니다. 미래 가격을 예측하는 기능은 아닙니다.
+          </p>
+          <p>
+            하역비는 원유 1배럴당 0.10달러입니다. 제품을 판매처로 보내는 출하비는 제품 1배럴당
+            0.10달러이고, 하루가 끝난 뒤 남아 있는 육상 원유·제품에는 배럴당 하루 0.015달러의
+            저장비가 붙습니다.
+          </p>
+          <h3>6. 60일 뒤 남은 재고도 가치가 있습니다</h3>
+          <p>
+            60일이 지나면 생산과 계약 공급을 끝냅니다. 남은 제품은 65일차부터 5일마다 앞서 정한 판매
+            한도 내에서 판매한다고 봅니다. 가격은 60일차 가격으로 고정하고, 판매할 때까지의 저장비와
+            출하비를 빼서 재고 가치를 계산합니다.
+          </p>
+          <p>
+            남은 원유는 실제 구매가격과 운송비를 기준으로 평가합니다. 창고에 남은 원유에는 이미
+            지급한 하역비 중 그 재고에 해당하는 몫도 포함합니다. 배에 남은 원유도 자산에 포함하며
+            앞으로 발생할 추가 비용은 0이라고 가정합니다.
+          </p>
+          <p>
+            처음부터 보유한 재고를 공짜로 받은 이익처럼 세지 않도록 시작 전 재고 가치를 차감합니다.
+            초기 Y 원유는 배럴당 78달러, 초기 제품은 위의 기준 판매가격으로 평가합니다.
+          </p>
+          <p>
+            <strong
+              >모형상 이익 = 60일 동안의 매출 − 구매·운송·처리·하역·출하·저장비 + 마지막에 남은 재고
+              가치 − 처음부터 보유한 재고 가치</strong
+            >
+          </p>
+          <p class="note">
+            이 값은 재고 평가까지 포함하므로 실제로 받은 현금이나 회계상 순이익과 같지 않습니다.
+          </p>
+          <h3>7. 무엇을 추천하고, 무엇까지는 설명하지 못하나요?</h3>
+          <p>
+            60일 내내 두 계약을 지킨 구매 조합 중 모형상 이익이 가장 높은 조합을 추천합니다. 최고
+            이익과 1달러 이내 차이인 조합은 동률로 표시합니다. 계약을 모두 지키는 조합이 없으면
+            부족량이 가장 적은 조합을 진단용으로 보여주며 추천하지 않습니다.
+          </p>
+          <p>
+            실시간 계산은 정해진 혼합·가동 규칙을 사용합니다. LP로 일별 처리량과 판매량까지 조정한
+            결과는 별도의 고정 실험표에서 확인합니다. 실제 원유 품질, 혼합 가능 여부, 상세 공정,
+            최소 가동률, 가동 방식 변경 비용과 정비는 생략했습니다. 따라서 실제 정유사의 구매안을
+            그대로 제시하는 모형은 아닙니다.
+          </p>
+        </div>
+      </details>
+      <section>
+        <h2>분석의 세 질문</h2>
+        <p>
+          <strong>Q1. 계약을 지킬 수 있나요?</strong> 어떤 구매 조합이 매일의 제품 계약을
+          충족합니까?
+        </p>
+        <p>
+          <strong>Q2. 어떤 조합이 더 이익인가요?</strong> 할인 이익은 어느 조건에서 처리·재고 부담에
+          밀립니까?
+        </p>
+        <p>
+          <strong>Q3. 추천은 어떤 조건에서 달라지나요?</strong> 운영 규칙과 가정이 바뀌어도 같은
+          조합이 유리합니까?
+        </p>
+        <p class="note">
+          ※ 본 프로젝트에서는 가상의 합성 데이터를 사용했습니다. 
+          데이터와 분석 결과는 실제 기업 데이터 및 
+          실증효과가 아닙니다.
+        </p>
+      </section>
+      <div class="tabs">
+        <button id="dashboardTab">결과 보기</button><button id="codeTab">코드 보기</button>
+      </div>
+      <div id="dashboard" class="panel">
+        <section id="decision"></section>
+        <section>
+          <h2>구매 구성비 전체 지도</h2>
+          <p>
+            현재 조건에서 5% 단위의 231개 후보를 모두 비교합니다. 점을 클릭하면 생산·재고 페이지와
+            손익 페이지의 그래프가 해당 후보로 바뀝니다. 꼭짓점은 원유 한 종류를 100% 구매하는
+            경우입니다.
+          </p>
+          <label
+            ><input id="contours" type="checkbox" style="width: auto" /> 보간 등고선 표시</label
+          >
+          <div id="mixmap"></div>
+          <p class="note" id="maplegend"></p>
+          <p id="selection"></p>
+          <button id="showBest">권고 조합으로 돌아가기</button>
+        </section>
+        <section>
+          <h2>할인폭 × 입고 지연 선택 지도</h2>
+          <p>
+            각 칸에서 구매 후보 전체를 다시 비교합니다. 칸을 클릭하면 해당 할인·지연 조건이 화면에
+            적용됩니다.
+          </p>
+          <label
+            >색 기준<select id="heatmode">
+              <option value="mix">권고 조합의 X 비율</option>
+              <option value="profit">계약 충족 후보의 최고 성과</option>
+            </select></label
+          ><button id="calculateMap">현재 조건으로 지도 계산</button>
+          <p class="note" id="heatstatus">
+            버튼을 눌러 계산하세요. 할인은 $1, 지연은 2일 간격입니다.
+          </p>
+          <div id="heatmap"></div>
+        </section>
+        <section>
+          <h2>설비 여유가 늘면 최대 이익은 어떻게 바뀔까요?</h2>
+          <p>
+            다른 조건과 원유 입고 일정을 고정한 뒤, 일간 작업부하량 한도만 바꿔 LP로 운영 계획을
+            계산했습니다. 각 한도에서 구매 조합 231개를 비교한 결과입니다.
+          </p>
+          <p class="note">
+            기준 실험: 초기 Y 원유 20만 배럴, 초기 휘발유·경유 각각 1만 배럴, X 할인 $5, 추가 지연
+            0일, 고정 가격입니다. 각 후보의 기준 입고·하역 일정은 한도를 바꿔도 그대로 유지합니다.
+            아래 차트는 저장된 LP 실험으로, 우측 조건 조정 패널과 별개입니다. 위 지도는 규칙 기반
+            시뮬레이션입니다.
+          </p>
+          <label for="capacityPoint"
+            >살펴볼 하루 작업부하량 한도 <output id="capacityValue"></output
+          ></label>
+          <input id="capacityPoint" type="range" min="0" max="18" step="1" value="8" />
+          <div id="capacityChart"></div>
+          <p id="capacityDetail" aria-live="polite"></p>
+          <p class="note">
+            X축: 일간 작업부하량 한도(작업부하량 단위/일)<br>
+            Y축: 60일 운영과 기말 재고를 함께 평가한 모형상 이익(백만 USD).<br> 
+            선은 계산한 지점을 연결한 안내선이며 중간값을 LP로 계산한 결과는 아닙니다.<br>
+            계약 불가 구간은 붉게 표시합니다. 색 띠는 계산 지점별 LP 권고 조합을 구분합니다.
+          </p>
+        </section>
+        <section>
+          <h2>가격 경로</h2>
+          <p class="note">
+            화면 우측 패널에서 미리 정의된 가격경로 중 하나를 선택하거나,<br>
+            아래 인터랙티브 차트를 통해 직접 가격경로를 만들 수 있습니다.<br>
+            X축: 일자 <br> 
+            Y축: 추가 판매 시장가격 (USD/배럴) <br>
+            ※ 추가 판매는 5일마다 발생합니다.
+          </p>
+          <h3>마우스로 가격 경로 만들기</h3>
+          <p class="note">
+            두 점을 좌우로 이동하면 시점, 위아래로 이동하면 기준가격 대비 변동률이 바뀝니다.
+            시작·끝은 100%로 고정합니다. 점을 조정하면 Custom 경로로 전환됩니다. 이는 정확한
+            2차함수가 아닌 부드러운 보간 경로입니다.
+          </p>
+          <div class="editor-scroll">
+            <svg
+              id="editor"
+              viewBox="0 0 760 260"
+              style="touch-action: none"
+              aria-label="두 점으로 조정하는 가격 경로"
+            ></svg>
+          </div>
+          <p id="handleStatus" aria-live="polite"></p>
+          <button id="resetPath">Flat으로 초기화</button>
+          <p class="note">
+            마우스로 날짜와 가격을 조정하세요.<br>
+            아래에서 제품별 실제 가격을
+            확인할 수 있습니다. <br>
+            편의상 경유는 휘발유보다, 
+            휘발유는 잔사유보다 가격이
+            높다고 가정했습니다. 
+          </p>
+          <div id="prices"></div>
+        </section>
+        <section>
+          <h2>제품 재고와 계약 부족</h2>
+          <p class="note">
+            X축: 일차 | Y축: 하루가 끝난 시점의 재고 (배럴) · 점선: 제품별 저장 한도 120,000배럴
+          </p>
+          <fieldset
+            id="inventoryLegend"
+            style="border: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px"
+          >
+            <legend>표시할 선을 선택하세요</legend>
+            <label
+              ><input id="inventory-gasoline" type="checkbox" checked="" style="width: auto" />
+              <span style="color: #087f8c">━ 휘발유</span></label
+            >
+            <label
+              ><input id="inventory-diesel" type="checkbox" checked="" style="width: auto" />
+              <span style="color: #cf702c">━ 경유</span></label
+            >
+            <label
+              ><input id="inventory-residual" type="checkbox" checked="" style="width: auto" />
+              <span style="color: #7763ad">━ 잔사유</span></label
+            >
+            <label
+              ><input
+                id="inventory-gasolineContract"
+                type="checkbox"
+                checked=""
+                style="width: auto"
+              />
+              <span style="color: #d62828">┄ 계약(휘발유)</span></label
+            >
+            <label
+              ><input
+                id="inventory-dieselContract"
+                type="checkbox"
+                checked=""
+                style="width: auto"
+              />
+              <span style="color: #e64949">┄ 계약(경유)</span></label
+            >
+          </fieldset>
+          <p class="note">
+            붉은 점선은 설정한 제품별 하루 계약량을 재고와 비교하기 위한 참고선입니다. 두 제품의
+            계약량이 같아 두 선은 겹칩니다. 휘발유는 긴 점선, 경유는 짧은 점선이며 범례에서 각각
+            켜고 끌 수 있습니다. 재고는 하루가 끝난 뒤 남은 양이므로, 이 선보다 낮아도 당일 계약을
+            이미 공급했다면 계약 위반이 아닙니다. 실제 부족량은 아래 표에서 확인하세요.
+          </p>
+          <div id="inventory"></div>
+          <div id="shortage"></div>
+        </section>
+        <section>
+          <h2>일별 처리량</h2>
+          <p class="note">
+            처리량은 원유 탱크에서 정유공장으로 처리된 배럴 수를 나타냅니다.<br>
+            X축: 일차 | Y축: 원유 처리량 (배럴/일) | 점선: 명목 최대 20,000배럴/일</p>
+          <div id="throughput"></div>
+          <h2>일별 작업부하량</h2>
+          <p class="note">
+            작업부하량은 설비의 부하한도 내에서 사용된 작업(부하)량을 의미합니다.<br>
+            유종별 배럴당 부하량: X=1.4, Y=1.0, Z=0.9<br>
+            X축: 일자 | Y축: 일간 작업부하량 (가상 점수/일)<br>
+            점선은 현재 설정한 작업부하량 한도입니다.
+            처리량이 적어도 X 비율이 높으면 작업부하량 한도에 도달할 수 있습니다. 처리량은 원유 재고와
+            제품 탱크 여유에도 제한됩니다.
+          </p>
+          <div id="workload"></div>
+        </section>
+        <section>
+          <h2>손익 구성</h2>
+          <div id="finance"></div>
+          <p class="note">
+            구매한 원유를 모두 처리하지 못해도 남은 원유는 자산으로 평가합니다. 아래 이익은 실제로
+            받은 현금만이 아니라 마지막 날 보유한 재고 가치까지 포함합니다. 원유 운송비(Freight
+            cost)는 원유를 공장으로 가져오는 비용이고, 제품 출하비(Shipping cost)는 만든 제품을
+            판매처로 보내는 비용입니다.
+          </p>
+        </section>
+        <section>
+          <h2>일자별 손익 분해</h2>
+          <p>
+            매출은 위쪽, 비용은 아래쪽에 표시합니다. 검은 선은 현재 표시한 항목의 합계입니다.
+            범례에서 항목을 선택해 변화의 원인을 확인하세요.
+          </p>
+          <label
+            >표시 방식<select id="breakmode">
+              <option value="daily">일별 발생 금액</option>
+              <option value="cumulative">항목별 누적 금액</option>
+            </select></label
+          ><label
+            ><input id="fullFinance" type="checkbox" style="width: auto" /> 구매·운송·기초·기말 재고
+            평가도 포함</label
+          >
+          <p class="note">
+            기본값은 1~60일 운영 내역입니다. 전체 포함 시 구매·운송비와 기초 자산 차감은 0일차(구매
+            결정 시점), 분석 마지막 날의 재고 가치는 60일차에 표시합니다. 재고 평가는 현금
+            매출·비용이 아닙니다. 실제 지급일을 모델링한 현금흐름도 아닙니다.
+          </p>
+          <div id="breaklegend"></div>
+          <div id="breakdown"></div>
+          <p id="breakstatus" class="note"></p>
+          <div id="breakdetail" class="scroll"></div>
+        </section>
+        <section>
+          <h2>가격 시나리오별 권고</h2>
+          <p class="note">
+            모든 시나리오에 동일한 운영 규칙을 적용합니다. Quadratic에는 기간 평균가격 상승 효과도
+            포함됩니다.
+          </p>
+          <div id="comparison"></div>
+        </section>
+        <section>
+          <h2>기준 전략(벤치마크)과 비교</h2>
+          <p>
+            모든 전략에 현재 화면의 동일한 입력·운영 규칙을 적용합니다. 계약을 위반하는 전략은
+            이익이 높더라도 실행 가능한 권고가 아닙니다.
+          </p>
+          <div class="scroll" id="benchmarks"></div>
+          <p id="insights"></p>
+        </section>
+        <section>
+          <h2>운영 규칙을 바꾸면? 선형계획(LP) 비교 실험</h2>
+          <p>
+            아래는 사전 계산한 고정 시나리오 결과입니다. 현재 슬라이더에 따라 변경되는 표가
+            아닙니다. 각 실험에서 구매 후보 231개를 모두 비교했습니다.
+          </p>
+          <div class="lp-primer">
+            <h3><mark>LP는 어떤 일을 하나요?</mark></h3>
+            <p>
+              선형계획(LP)은
+              <strong>반드시 지켜야 할 조건 안에서 가장 이익이 큰 선택을 찾는 계산 방법</strong>입니다. 
+              피자 가게가 재료와 조리 시간에 맞춰 메뉴별 생산량을 정하는 것과 비슷합니다.
+              이 프로젝트에서는 원유별 처리량과 추가 판매량을 정합니다.
+            </p>
+            <p>
+              예를 들어 X 원유는 1배럴을 처리할 때 작업부하량 1.4점을 쓰고, Y는 1점을 씁니다. X
+              1,000배럴과 Y 1,000배럴을 처리하면 총 2,400점입니다. 처리량을 두 배로 늘리면 필요한
+              점수도 두 배가 됩니다. 이렇게 물량에 따라 비용·생산량·작업부하량이 일정한 비율로 변한다는
+              가정 때문에 ‘선형’이라고 부릅니다.
+            </p>
+            <p>
+              <strong>계산 순서:</strong> 구매 조합 231개를 하나씩 정한 뒤, 각 조합에서 매일 얼마나
+              처리하고 판매할지 LP로 계산합니다. 계약 물량, 하루 처리 한도, 탱크 크기를 모두
+              지키면서 이익이 가장 높은 운영 계획을 찾고, 마지막에 구매 조합끼리 비교합니다.
+            </p>
+
+              <details class="lp-disclosure" id="lpLearning">
+                <summary>LP 권고는 어떻게 도출되나요?</summary>
+                <p>
+                  <strong>원리를 설명하는 교육용 예시입니다.</strong> 실제 모델을 그대로 2차원으로
+                  그린 그림이 아닙니다. 원유 두 종류와 하루 운영으로 단순화했고, 운송·재고·판매
+                  일정은 생략했습니다. 우측 조건 패널과 독립적으로 움직입니다.
+                </p>
+                <p>
+                  X축은 X 원유, Y축은 Y 원유의 하루 투입량입니다. 색칠한 영역은 모든 조건을 지키는
+                  조합입니다. 같은 이익을 내는 조합을 연결한 점선을 이익이 커지는 방향으로 옮겨
+                  보세요. 가능한 영역에 마지막으로 닿는 곳이 최적점입니다.
+                </p>
+                <label for="learningBudget"
+                  >예시의 하루 작업부하량 한도 <output id="learningBudgetValue"></output
+                ></label>
+                <input id="learningBudget" type="range" min="16" max="28" step=".5" value="24" />
+                <label for="learningProfit"
+                  >이익선 이동: 하루 이익 목표 <output id="learningProfitValue"></output
+                ></label>
+                <input id="learningProfit" type="range" min="0" max="240" step="1" value="100" />
+                <button type="button" id="learningOptimum">이익선을 최적점까지 이동</button>
+                <div id="learningChart"></div>
+                <p id="learningDetail" aria-live="polite"></p>
+                <p class="note">
+                  투입량 단위는 천 배럴/일입니다. 
+                  처리량 x+y≤20, 작업부하량 1.4x+y≤선택한 한도,<br>
+                  휘발유 생산 .25x+.30y≥5, 경유 생산 .35x+.45y≥5,<br> 
+                  사용 가능한 원유 x≤14·y≤16, x·y≥0을 적용합니다.<br>
+                  교육용 순이익은 X유종 $9/배럴, Y유종 $6/배럴로 가정하므로<br>
+                  하루 이익은 9x+6y(천 USD)입니다.<br>
+                  ※ 실제 손익 계산의 계수가 아닙니다.
+                </p>
+                <p>
+                  실제 비교실험은 세 종류의 원유와 계약준수 조건을 고려합니다. 각 구매 조합의 입고
+                  일정을 고정하고 생산·추가 판매·재고 계획을 최적화한 뒤, 조합 231개의 결과를 비교해
+                  LP 권고를 고릅니다.<br>
+                  ※ 이 예시의 점선 이동은 최적화 원리를 설명하며, 실제 계산
+                  알고리즘의 실행 경로를 재현하지 않습니다.
+                </p>
+              </details>
+
+            <p>
+              <strong>대시보드와의 차이:</strong> 실시간 계산은 창고에 있는 원유 비율대로 섞고
+              가능한 만큼 처리합니다. LP는 그 비율과 처리량도 조절할 수 있습니다. 다만 미래 가격을
+              미리 알고 계산하므로, LP와의 이익 차이를 실제로 얻을 수 있는 추가 수익이라고 볼 수는
+              없습니다.
+            </p>
+            <p class="note">
+              LP가 찾아주는 최선의 답은 이 모형에 넣은 조건 안에서의 답입니다. 실제 공장에서 빠진
+              조건이 있으면 현실의 최선과 달라질 수 있습니다. 아래 표는 미리 계산한 다섯가지 실험이며
+              슬라이더를 움직여도 바뀌지 않습니다.
+            </p>
+          </div>
+          <p id="lpContractScope" class="note" aria-live="polite"></p>
+          <div class="scroll" id="lpcomparison"></div>
+          <div class="lp-conditions">
+            <details class="lp-disclosure">
+              <summary>결과표는 이렇게 읽어주세요</summary>
+              <ul>
+                <li>
+                  <strong>계약을 지킨 조합 수:</strong> 구매 후보 231개 중 60일 동안 휘발유·경유
+                  계약을 모두 지킨 조합의 수입니다. 기존 규칙과 LP의 수를 비교하면 운영 방식을
+                  바꿨을 때 선택지가 늘어나는지 알 수 있습니다.
+                </li>
+                <li>
+                  <strong>LP 권고:</strong> LP로 운영 계획까지 조절했을 때 가장 이익이 높은 구매
+                  비율입니다. X·Y·Z의 순서로 표시합니다.
+                </li>
+                <li>
+                  <strong>같은 평가 기준의 이익:</strong> 두 방식에 같은 재고 평가 방법을 적용한
+                  결과입니다. 기본 손익 페이지의 금액과 직접 비교하지 마세요.
+                </li>
+                <li>
+                  <strong>이익 차이:</strong> LP의 최고 이익에서 기존 규칙의 최고 이익을 뺀
+                  값입니다. 두 방식이 선택한 구매 조합은 서로 다를 수 있습니다. 차이가 0이어도
+                  계약을 지킬 수 있는 조합 수는 늘어날 수 있습니다.
+                </li>
+              </ul>
+              <p class="note">
+                이 표는 미리 계산한 다섯 실험입니다. 현재 슬라이더 설정과 연결되어 있지 않습니다.
+                LP는 미래 가격과 입고 일정을 모두 알고 계산하며, 혼합 비율과 가동량을 함께 바꿉니다.
+                따라서 이익 차이를 실제 추가 수익으로 보거나 특정 변화 하나의 효과로 단정할 수는
+                없습니다.
+              </p>
+
+              <details class="lp-disclosure">
+                <summary>주의사항</summary>
+                <p>
+                  각 구매 후보의 기존 시뮬레이터 날짜별 입고량을 고정하고, 일별 유종별 투입량·추가
+                  판매량·재고를 LP로 결정합니다. 재고 비례 혼합과 최대 가동 의무는 제거합니다. 계약
+                  공급량, 하루 처리량과 작업부하량 한도, 생산 직후 제품 탱크 한도, 추가 판매 한도와 다음
+                  날 계약용 재고 조건은 유지합니다. 이는 미래 가격과 입고 일정을 모두 알고 계산한
+                  비교이며 실제 운영 예측이 아닙니다.
+                </p>
+                <p>
+                  두 결과 모두 남은 원유를 취득원가+운송비로 평가하고, 기말 원유의 하역비 잔여평가를
+                  제외합니다. 따라서 기본 손익 표와 이익을 직접 비교하면 안 됩니다. 제품 처분은
+                  동일한 5일 판매일과 비용을 사용합니다. 입고·하역 일정은 후보마다 달라서
+                  구매/하역/운영 전체를 공동 최적화한 결과가 아닙니다.
+                </p>
+              </details>
+            </details>
+            <details class="lp-disclosure">
+              <summary>표의 ‘기준’은 어떤 상황인가요?</summary>
+              <p>
+                ‘기준’은 아래 조건을 모두 적용한 출발점입니다. 다른 네 실험에서는 이 조건 중 하나만
+                바꿉니다. 따라서 어떤 변화 때문에 결과가 달라졌는지 비교할 수 있습니다.
+              </p>
+              <div class="scroll">
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>항목</th>
+                      <th>기준 조건</th>
+                      <th>뜻</th>
+                    </tr>
+                    <tr>
+                      <td>시작할 때의 원유 재고</td>
+                      <td>Y 원유 200,000배럴</td>
+                      <td>신규 구매 100만 배럴과 별도로 이미 보유한 물량입니다.</td>
+                    </tr>
+                    <tr>
+                      <td>시작할 때의 제품 재고</td>
+                      <td>휘발유·경유 각각 10,000배럴</td>
+                      <td>각 제품의 이틀치 계약 물량이며, 잔사유는 없습니다.</td>
+                    </tr>
+                    <tr>
+                      <td>X 원유 추가 할인</td>
+                      <td>배럴당 5달러</td>
+                      <td>
+                        X 구매가격은 기본 75달러에서 할인을 뺀 70달러입니다. 운송비는 별도입니다.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>X 원유 추가 입고 지연</td>
+                      <td>0일</td>
+                      <td>
+                        X·Y·Z 모두 7일차부터 하역할 수 있습니다. 도착한 물량이 전부 한꺼번에 창고로
+                        들어오는 것은 아닙니다.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>일간 작업부하량 한도</td>
+                      <td>20,000점</td>
+                      <td>
+                        원유별 작업부하량을 더한 값이 이 한도를 넘을 수 없습니다. 하루 원유 처리량도
+                        별도로 20,000배럴 이하입니다.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>추가 판매 가격</td>
+                      <td>고정 가격(Flat)</td>
+                      <td>
+                        휘발유 95달러, 경유 105달러, 잔사유 55달러입니다. 변동폭 설정은 20%이지만
+                        고정 가격에서는 적용되지 않습니다.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+            <details class="lp-disclosure">
+              <summary>각 실험에서는 무엇이 달라지나요?</summary>
+              <div class="scroll">
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>실험</th>
+                      <th>기준에서 바꾸는 조건</th>
+                      <th>확인하려는 질문</th>
+                    </tr>
+                    <tr>
+                      <td>기준</td>
+                      <td>변경 없음</td>
+                      <td>출발 조건에서 운영 방식을 바꾸면 이익이나 선택지가 늘어나나요?</td>
+                    </tr>
+                    <tr>
+                      <td>할인 확대</td>
+                      <td>X 할인: 5달러 → 12달러/배럴</td>
+                      <td>
+                        X 구매가격이 70달러에서 63달러로 낮아지면, 처리 부담을 감수하고 X를 더 사는
+                        편이 유리한가요?
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>X 입고 지연</td>
+                      <td>X 추가 지연: 0일 → 15일</td>
+                      <td>
+                        X는 22일차부터 하역할 수 있습니다. 늦게 들어오는 원유를 사도 매일 계약을
+                        지킬 수 있나요?
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>낮은 작업부하량 한도</td>
+                      <td>일간 작업부하량 한도: 20,000점 → 15,000점</td>
+                      <td>
+                        공장이 감당할 수 있는 작업부하량이 줄면, 혼합 비율과 가동량 조절이 얼마나 도움이
+                        되나요?
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Wave 가격</td>
+                      <td>고정 가격 → 하락 후 상승하는 가격 경로, 변동폭 20%</td>
+                      <td>
+                        추가 판매 가격이 변하면 판매 시점과 생산 계획 조절이 얼마나 도움이 되나요?
+                        시작·마지막 가격은 기준가격과 같습니다.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+
+          <p class="note">
+            재현: analysis/export.js → analysis/optimize.py. 계산 목표와 지켜야 할 조건은 왼쪽 문서
+            버튼의 ‘방법론’에서 읽을 수 있습니다.
+          </p>
+        </section>
+        <section>
+          <h2>전체 231개 후보</h2>
+          <div class="scroll" id="candidates"></div>
+        </section>
+      </div>
+      <section id="code" hidden="">
+        <h2>실제 실행 코드</h2>
+        <p>
+          구매 후보 생성 → 일별 물량·비용 계산 → 계약 충족 후보 비교 순서입니다. 아래 코드는 실제
+          실행되는 engine.js입니다.
+        </p>
+        <pre id="source"></pre>
+      </section>
+      <p class="note">
+        ※ 합성 데이터를 이용한 가상 포트폴리오 실험입니다. 실제 회사의 운영 시스템을 재현하지 않습니다.
+      </p>
+      <section id="projectResources" hidden="">
+        <h2>원본 코드와 문서 안내</h2>
+        <p id="resourceMessage"></p>
+        <div id="resourceLinks"></div>
+      </section>
+    </main>
+    <script src="engine.js"></script>
+    <script src="maps.js"></script>
+    <script src="breakdown.js"></script>
+    <script src="lp-results.js"></script>
+    <script src="capacity-results.js"></script>
+    <script src="benchmark.js"></script>
+    <script src="app.js"></script>
+    <script src="docs-data.js"></script>
+    <script src="reader-pages.js"></script>
+    <script src="lp-charts.js"></script>
+    <script src="help.js"></script>
+    <script src="resource-links.js"></script>
+    <nav id="mobileActions" class="mobile-only" aria-label="모바일 문서와 조건 조정">
+      <button id="mobileDocsOpen" type="button">문서 읽기</button
+      ><button
+        id="mobileControlsOpen"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="mobileControls"
+        aria-expanded="false"
+      >
+        조건 조정
+      </button>
+    </nav>
+    <dialog id="mobileControls" aria-labelledby="mobileControlsTitle">
+      <header class="sheet-header">
+        <h2 id="mobileControlsTitle">구매 조합과 조건 조정</h2>
+        <button id="mobileControlsClose" type="button">닫기 ×</button>
+      </header>
+      <div id="mobileControlsBody"></div>
+    </dialog>
+    <script src="mobile.js"></script>
+    <script src="theme.js"></script>
+  </body>
+</html>
